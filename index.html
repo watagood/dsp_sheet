@@ -3,253 +3,750 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>AMC CSV → Excel（文字化け修正）</title>
+  <title>次月継続 転記ツール（NET / 一括Order / ¥出力）</title>
 
   <style>
     :root{
-      --bg1:#fff3f8;
-      --bg2:#eef4ff;
+      /* ===== Light / Pink-Purple theme (ref) ===== */
+      --bg1:#fff7fb;
+      --bg2:#f2f7ff;
       --card:#ffffff;
       --text:#111;
       --muted:#5f6470;
-      --line:#e6e6f0;
-      --shadow: 0 18px 60px rgba(20,20,35,.08);
-      --shadow2: 0 10px 28px rgba(20,20,35,.08);
-      --radius:22px;
+      --line:#e8e7ef;
 
-      /* accent */
+      --shadow: 0 18px 60px rgba(20, 20, 35, .08);
+      --shadow2: 0 10px 28px rgba(20, 20, 35, .08);
+      --radius: 22px;
+
       --accent1:#ff4fa3;
       --accent2:#6b7cff;
-      --accentGlow1: rgba(255,79,163,.25);
-      --accentGlow2: rgba(107,124,255,.25);
+      --accentGlow1: rgba(255, 79, 163, .18);
+      --accentGlow2: rgba(107, 124, 255, .20);
+
+      /* status colors */
+      --warn:#ffda6e;
+      --ok:#3ccf88;
+      --bad:#ff6e6e;
     }
 
-    *{box-sizing:border-box;}
+    *{
+      box-sizing:border-box;
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", "Noto Sans JP", sans-serif;
+    }
+
     body{
       margin:0;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans JP", sans-serif;
       color:var(--text);
       background:
-        radial-gradient(1000px 700px at 8% 8%, var(--bg1), transparent 60%),
-        radial-gradient(1000px 700px at 92% 18%, var(--bg2), transparent 60%),
-        linear-gradient(180deg,#fff,#f9faff);
+        radial-gradient(1200px 800px at 10% 10%, var(--bg1), transparent 60%),
+        radial-gradient(1200px 800px at 90% 20%, var(--bg2), transparent 60%),
+        linear-gradient(180deg, #ffffff, #fbfbff);
       min-height:100vh;
     }
 
-    .wrap{
-      min-height:100vh;
-      display:flex;
-      justify-content:center;
-      padding:36px 18px;
-    }
+    .wrap{max-width:1100px;margin:28px auto;padding:0 16px;}
+    .top{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+    h1{margin:0;font-size:20px;letter-spacing:.02em;}
+    .sub{color:var(--muted);margin-top:6px;font-size:13px;line-height:1.6;}
+    .brand{color:rgba(17,17,17,.55);font-size:12px;}
 
     .card{
-      width:min(1100px,100%);
-      background:var(--card);
+      background: var(--card);
       border:1px solid var(--line);
-      border-radius:var(--radius);
-      box-shadow:var(--shadow);
-      padding:28px;
-      display:flex;
-      flex-direction:column;
-      gap:18px;
+      border-radius:16px;
+      padding:16px;
+      margin-top:14px;
+      box-shadow: var(--shadow2);
     }
 
-    header{
-      display:flex;
-      flex-direction:column;
-      gap:6px;
+    .row{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;}
+    .field{flex:1;min-width:240px;}
+    label{display:block;font-size:12px;color:var(--muted);margin:0 0 6px;}
+
+    input,button,textarea{
+      width:100%;
+      padding:10px 10px;
+      background:#fff;
+      color:var(--text);
+      border:1px solid var(--line);
+      border-radius:14px;
+      outline:none;
     }
 
-    h1{
-      margin:0;
-      font-size:22px;
-      letter-spacing:.2px;
+    input:focus,textarea:focus{
+      border-color: rgba(107,124,255,.55);
+      box-shadow: 0 0 0 4px rgba(182,167,255,.18);
     }
 
-    .sub{
-      font-size:13px;
-      color:var(--muted);
-      line-height:1.7;
+    button{
+      cursor:pointer;
+      font-weight:900;
+      letter-spacing:.02em;
+      transition:.15s transform, .15s filter, .15s box-shadow, .15s border-color;
+    }
+    button:hover{transform:translateY(-1px);filter:brightness(1.02);}
+
+    .primary{
+      color:#fff;
+      border:0;
+      background: linear-gradient(135deg, var(--accent1), var(--accent2));
+      box-shadow:
+        0 14px 34px rgba(107,124,255,.18),
+        0 10px 26px rgba(255,79,163,.14);
+    }
+
+    .ghost{
+      background:transparent;
+      border:1px solid var(--line);
+      color:var(--text);
+    }
+    .ghost:hover{
+      border-color: rgba(107,124,255,.35);
+      box-shadow: 0 10px 22px rgba(107,124,255,.10);
+    }
+
+    .danger{
+      border-color: rgba(255,110,110,.35);
+      color:#b91c1c;
+      background: rgba(255,110,110,.06);
+    }
+    .danger:hover{
+      border-color: rgba(255,110,110,.55);
+      box-shadow: 0 10px 22px rgba(255,110,110,.10);
+    }
+
+    textarea{
+      min-height:130px;
+      resize:vertical;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      background:#fff;
     }
 
     .grid{
-      display:grid;
-      grid-template-columns:1.2fr .8fr;
-      gap:16px;
-    }
-
-    .panel{
-      border:1px solid var(--line);
-      border-radius:18px;
-      padding:18px;
-      background:linear-gradient(180deg,#fff,#fcfcff);
-      box-shadow:var(--shadow2);
-    }
-
-    .label{
-      font-size:12px;
-      color:var(--muted);
-      margin-bottom:8px;
-    }
-
-    /* upload */
-    .drop{
-      border:2px dashed rgba(107,124,255,.55);
-      border-radius:18px;
-      padding:18px;
-      background:
-        radial-gradient(700px 160px at 10% 0%, rgba(255,79,163,.12), transparent 60%),
-        radial-gradient(700px 160px at 90% 0%, rgba(107,124,255,.14), transparent 60%),
-        linear-gradient(180deg,#fff,#fdf7ff);
-      box-shadow:0 12px 28px rgba(107,124,255,.10);
-      transition:.15s;
-    }
-    .drop.dragover{
-      border-color:#ff4fa3;
-      box-shadow:0 0 0 6px var(--accentGlow2),0 14px 34px rgba(107,124,255,.18);
-      transform:translateY(-1px);
-    }
-
-    input[type="file"]{
       width:100%;
-      padding:12px;
-      font-size:14px;
+      border-collapse:collapse;
+      overflow:hidden;
       border-radius:14px;
       border:1px solid var(--line);
       background:#fff;
+      box-shadow: var(--shadow2);
     }
-
-    input[type="text"]{
-      width:100%;
-      padding:14px;
-      font-size:15px;
-      border-radius:14px;
-      border:1px solid var(--line);
-      background:#fff;
-      outline:none;
-    }
-    input[type="text"]:focus{
-      border-color:#b6a7ff;
-      box-shadow:0 0 0 4px rgba(182,167,255,.25);
-    }
-
-    .hint{
-      font-size:12px;
-      color:var(--muted);
-      margin-top:8px;
-      line-height:1.6;
-    }
-
-    /* button */
-    button{
-      appearance:none;
-      border:0;
-      cursor:pointer;
-      padding:16px 22px;
-      border-radius:20px;
-      font-size:15px;
-      font-weight:900;
-      letter-spacing:.3px;
-      color:#fff;
-      background:linear-gradient(135deg,var(--accent1),var(--accent2));
-      box-shadow:
-        0 16px 36px rgba(107,124,255,.28),
-        0 12px 30px rgba(255,79,163,.22);
-      transition:.12s;
-    }
-    button:hover{
-      transform:translateY(-1px);
-      filter:brightness(1.04);
-    }
-    button:disabled{
-      opacity:.45;
-      cursor:not-allowed;
-      box-shadow:none;
-    }
-
-    .actions{
-      display:flex;
-      gap:14px;
-      align-items:center;
-    }
-
-    .log{
-      border:1px solid var(--line);
-      border-radius:18px;
-      padding:16px;
-      background:#fff;
+    .grid th,.grid td{
+      border-bottom:1px solid var(--line);
+      padding:10px;
+      text-align:left;
       font-size:13px;
-      line-height:1.7;
+      vertical-align:middle;
     }
+    .grid th{
+      color:var(--muted);
+      font-weight:900;
+      background: linear-gradient(180deg, #ffffff, #fcfcff);
+    }
+    .grid tr:last-child td{border-bottom:none;}
 
-    .ok{color:#0a7;font-weight:800;}
-    .warn{color:#b70;font-weight:800;}
-    .err{color:#c00;font-weight:800;}
-    .mono{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;}
+    .mini{font-size:11px;color:var(--muted);line-height:1.45;}
 
-    .credit{
-      position:fixed;
-      right:14px;
-      bottom:10px;
-      font-size:10px;
-      color:rgba(0,0,0,.55);
-      background:rgba(255,255,255,.7);
-      border:1px solid rgba(230,230,240,.9);
-      padding:6px 8px;
+    .pill{display:inline-flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);}
+    .dot{width:8px;height:8px;border-radius:999px;background:var(--warn);}
+    .dot.ok{background:var(--ok);}
+    .dot.bad{background:var(--bad);}
+
+    .kpi{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+    .badge{
+      display:inline-flex;
+      align-items:baseline;
+      gap:8px;
+      border:1px solid var(--line);
       border-radius:999px;
-      backdrop-filter:blur(6px);
-      pointer-events:none;
+      padding:8px 12px;
+      background: linear-gradient(180deg, #ffffff, #fcfcff);
+      box-shadow: 0 10px 18px rgba(116,84,255,.08);
+    }
+    .badge b{font-size:16px;}
+    .badge small{color:var(--muted);font-weight:900;}
+    .money{font-variant-numeric: tabular-nums; white-space:nowrap;}
+    .right{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+    .bigBtn{padding:12px 14px; border-radius:16px;}
+
+    /* ¥ prefix input */
+    .yen{position:relative;}
+    .yen .prefix{
+      position:absolute; left:12px; top:50%; transform:translateY(-50%);
+      color:var(--muted); font-weight:900; pointer-events:none;
+    }
+    .yen input{padding-left:28px;}
+
+    /* Highlight: budget card */
+    .highlightBudget{
+      background:
+        radial-gradient(900px 220px at 10% 0%, rgba(255,79,163,.10), transparent 60%),
+        radial-gradient(900px 220px at 90% 0%, rgba(107,124,255,.12), transparent 60%),
+        linear-gradient(180deg, #ffffff, #fdf7ff);
+      border: 2px solid rgba(107,124,255,.45);
+      box-shadow: var(--shadow);
     }
 
-    @media(max-width:900px){
-      .grid{grid-template-columns:1fr;}
-      .card{padding:20px;}
-      h1{font-size:20px;}
+    /* Output highlight */
+    .outputCard{
+      border:2px solid rgba(107,124,255,.45);
+      box-shadow: var(--shadow);
+      background:
+        radial-gradient(900px 220px at 10% 0%, rgba(107,124,255,.10), transparent 60%),
+        radial-gradient(900px 220px at 90% 0%, rgba(255,79,163,.08), transparent 60%),
+        linear-gradient(180deg, #ffffff, #fbfbff);
+    }
+    .highlightOutput{
+      border: 3px solid rgba(167,139,250,.55);
+      background:
+        radial-gradient(900px 220px at 10% 0%, rgba(167,139,250,.12), transparent 60%),
+        linear-gradient(180deg, #ffffff, #fcfcff);
+    }
+    .outputTitle{
+      font-size:18px;
+      font-weight:900;
+      letter-spacing:.02em;
+      color:#6b5cff;
+    }
+    .outputArea{
+      min-height:190px;
+      border:2px solid rgba(167,139,250,.35);
+      background: linear-gradient(180deg, #ffffff, #fcfcff);
     }
   </style>
 </head>
 
 <body>
-  <div class="credit">watagood · miyu.watanabe</div>
-
   <div class="wrap">
+    <div class="top">
+      <div>
+        <h1>次月継続 転記ツール（NET / 一括Order / ¥出力）</h1>
+        <div class="sub">
+          ❶全体予算（NET） → ❷Order配分% → ❸期間% → ❹転記用生成（¥付き）
+        </div>
+      </div>
+      <div class="brand">made by miyu.watanabe</div>
+    </div>
+
+    <!-- ❶ 全体予算（NET） -->
+    <div class="card highlightBudget">
+      <div class="row">
+        <div class="field">
+          <label style="font-weight:900; font-size:14px;">❶ 全体予算（NET）</label>
+          <div class="yen">
+            <span class="prefix">¥</span>
+            <input id="totalBudget" type="number" min="0" step="1" placeholder="例）500000" />
+          </div>
+        </div>
+
+        <div class="field">
+          <label>ステータス（%合計が一瞬で分かる）</label>
+          <div class="kpi">
+            <div class="pill"><span id="statusDot" class="dot"></span><span id="statusText">入力してね</span></div>
+          </div>
+          <div class="kpi" style="margin-top:10px;">
+            <div class="badge"><small>Order%</small><b id="orderPctSum">0%</b></div>
+            <div class="badge"><small>期間%</small><b id="periodPctSum">0%</b></div>
+            <div class="badge"><small>NET合計</small><b id="totalBudgetView">¥0</b></div>
+          </div>
+          <div class="mini" style="margin-top:8px;">
+            ※ %が100%じゃなくても生成はできる（端数は最後の行に寄せて帳尻合わせ）
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ❷ Order（テキスト一括 / 自動反映） -->
     <div class="card">
-      <header>
-        <h1>AMC CSV → Excel（文字化け修正）</h1>
-        <p class="sub">
-          CSVをExcelで開ける <span class="mono">.xls</span> に変換します（ローカル処理のみ）。<br>
-          Excel警告が出たら <b>OK</b> を押してください。
-        </p>
-      </header>
-
-      <div class="grid">
-        <section class="panel">
-          <div class="label">CSVアップロード（複数OK）</div>
-          <div id="drop" class="drop">
-            <input id="files" type="file" multiple accept=".csv,.tsv,text/csv,text/tab-separated-values">
-            <div class="hint">ドラッグ＆ドロップ対応。文字コードは自動判定。</div>
-          </div>
-          <div id="fileInfo" class="hint"></div>
-        </section>
-
-        <section class="panel">
-          <div class="label">出力名デフォルト</div>
-          <input id="defaultName" type="text" value="amc_report">
-          <div class="hint">
-            複数時：<span class="mono">_01, _02 …</span> が自動付与
-          </div>
-        </section>
+      <div class="row" style="justify-content:space-between;align-items:center;">
+        <div>
+          <div style="font-weight:900;">❷ Order（改行で別Order）</div>
+          <div class="mini">書式例：<b>Order名,40</b>（区切りは「,」or「タブ」or「スペース」でもOK）</div>
+        </div>
+        <div class="right">
+          <button class="ghost danger bigBtn" id="clearOrdersBtn">Order全消し</button>
+        </div>
       </div>
 
-      <div class="actions">
-        <button id="convert" disabled>Excelに変換してダウンロード</button>
+      <div style="margin-top:10px;">
+        <label>Order一括入力</label>
+        <textarea id="ordersBulk" placeholder="例）
+kagome_Vendor_almond breeze_Performance+,40
+kagome_Vendor_これいち_Performance+,60"></textarea>
       </div>
 
-      <div id="log" class="log">ファイルを選ぶと変換できます。</div>
+      <div style="margin-top:10px; overflow:auto;">
+        <table class="grid">
+          <thead>
+            <tr>
+              <th style="min-width:420px;">Order名</th>
+              <th style="min-width:140px;">配分 %（編集可）</th>
+              <th style="min-width:220px;">Order金額（¥ / 自動）</th>
+            </tr>
+          </thead>
+          <tbody id="ordersTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ❸ 期間 -->
+    <div class="card">
+      <div class="row" style="justify-content:space-between;align-items:center;">
+        <div>
+          <div style="font-weight:900;">❸ 期間</div>
+        </div>
+        <div class="right">
+          <button class="primary bigBtn" id="addPeriodBtn">＋ 期間追加</button>
+          <button class="ghost danger bigBtn" id="clearPeriodsBtn">期間全消し</button>
+        </div>
+      </div>
+
+      <div style="margin-top:10px; overflow:auto;">
+        <table class="grid">
+          <thead>
+            <tr>
+              <th style="min-width:170px;">Flight開始日</th>
+              <th style="min-width:170px;">Flight終了日</th>
+              <th style="min-width:140px;">配分 %</th>
+              <th style="width:1%;">削除</th>
+            </tr>
+          </thead>
+          <tbody id="periodsBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ❹ Output -->
+    <div class="card outputCard highlightOutput">
+      <div class="row" style="justify-content:space-between;align-items:center;">
+        <div>
+          <div class="outputTitle">❹ 貼り付け用アウトプット（転記用 / TSV / ¥付き）</div>
+          <div class="mini">Order×期間で行展開。Flight Budgetは必ず <b>¥</b> 表記。</div>
+        </div>
+        <div class="right">
+          <button class="primary bigBtn" id="generateBtn">転記用生成</button>
+          <button class="primary bigBtn" id="copyBtn">コピー</button>
+          <button class="ghost danger bigBtn" id="clearOutputBtn">消す</button>
+        </div>
+      </div>
+
+      <div style="margin-top:10px;">
+        <textarea id="output" class="outputArea" placeholder="転記用TSVがここに出ます → そのままスプシへ貼り付け"></textarea>
+      </div>
     </div>
   </div>
 
-  <!-- ⚠️ JSは元コードそのまま入れてください（省略せず貼る） -->
+<script>
+  // ===== util =====
+  const toNum = (v) => {
+    const n = Number(String(v ?? "").trim());
+    return Number.isFinite(n) ? n : 0;
+  };
+  const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
+  const roundYen = (n) => Math.round(n);
+  const yen = (n) => "¥" + (toNum(n)).toLocaleString("ja-JP");
+  const fmtYMD = (val) => (val ? val.replaceAll("-", "/") : "");
+  const qsa = (sel, el=document) => Array.from(el.querySelectorAll(sel));
+
+  // ===== elements =====
+  const elTotalBudget = document.getElementById("totalBudget");
+  const elTotalBudgetView = document.getElementById("totalBudgetView");
+
+  const elOrdersBulk = document.getElementById("ordersBulk");
+  const elOrdersTableBody = document.getElementById("ordersTableBody");
+
+  const elPeriodsBody = document.getElementById("periodsBody");
+
+  const elOrderPctSum = document.getElementById("orderPctSum");
+  const elPeriodPctSum = document.getElementById("periodPctSum");
+
+  const elStatusDot = document.getElementById("statusDot");
+  const elStatusText = document.getElementById("statusText");
+
+  const elOutput = document.getElementById("output");
+
+  // ===== state =====
+  let ordersState = []; // { name, pct }
+
+  // ===== focus helpers =====
+  function focusOrders(){
+    elOrdersBulk.focus();
+    const v = elOrdersBulk.value;
+    elOrdersBulk.setSelectionRange(v.length, v.length);
+  }
+
+  function ensurePeriodRow(){
+    if (elPeriodsBody.querySelectorAll("tr").length === 0){
+      elPeriodsBody.appendChild(makePeriodRow());
+    }
+  }
+
+  function focusFirstPeriodStart(){
+    ensurePeriodRow();
+    const firstStart = elPeriodsBody.querySelector("tr input[type='date']");
+    if (firstStart) firstStart.focus();
+  }
+
+  function focusNextPeriodStart(fromTr){
+    const rows = qsa("tr", elPeriodsBody);
+    const idx = rows.indexOf(fromTr);
+    const next = rows[idx + 1];
+
+    if (next){
+      const start = next.querySelector("input[type='date']");
+      if (start) start.focus();
+      return;
+    }
+
+    const newTr = makePeriodRow();
+    elPeriodsBody.appendChild(newTr);
+    const start = newTr.querySelector("input[type='date']");
+    if (start) start.focus();
+  }
+
+  // ===== parse bulk orders =====
+  function parseOrdersBulk(text){
+    const lines = String(text || "")
+      .split(/\r?\n/)
+      .map(l => l.trim())
+      .filter(l => l.length > 0);
+
+    const parsed = [];
+    for (const line of lines){
+      const parts = line.split(/[,\t]/).map(s => s.trim()).filter(Boolean);
+      if (parts.length >= 2){
+        parsed.push({ name: parts[0], pct: toNum(parts[1]) });
+      } else {
+        const sp = line.split(/\s+/);
+        if (sp.length >= 2 && !isNaN(Number(sp[sp.length-1]))){
+          const pct = toNum(sp[sp.length-1]);
+          const name = sp.slice(0, -1).join(" ");
+          parsed.push({ name, pct });
+        } else {
+          parsed.push({ name: line, pct: 0 });
+        }
+      }
+    }
+    return parsed;
+  }
+
+  // ===== in-place recalculation (no rerender while typing %) =====
+  function recalcOrdersInPlace(){
+    const total = toNum(elTotalBudget.value);
+    elTotalBudgetView.textContent = yen(total);
+
+    // DOM% -> state
+    const pctInputs = qsa("input[type='number']", elOrdersTableBody);
+    pctInputs.forEach((inp, i) => {
+      if (ordersState[i]) ordersState[i].pct = toNum(inp.value);
+    });
+
+    const pctSum = ordersState.reduce((s,o)=>s+toNum(o.pct),0);
+    elOrderPctSum.textContent = `${Math.round(pctSum*100)/100}%`;
+
+    const amts = ordersState.map(o => roundYen(total * (toNum(o.pct)/100)));
+    const sumAmt = amts.reduce((s,a)=>s+a,0);
+    const diff = total - sumAmt;
+    if (amts.length > 0) amts[amts.length - 1] = clamp(amts[amts.length - 1] + diff, 0, total);
+
+    const moneyCells = qsa(".money", elOrdersTableBody);
+    amts.forEach((a,i) => {
+      if (moneyCells[i]) moneyCells[i].textContent = yen(a);
+    });
+
+    updateStatus();
+  }
+
+  // ===== orders table render =====
+  function renderOrdersTable(){
+    elOrdersTableBody.innerHTML = "";
+    const total = toNum(elTotalBudget.value);
+    elTotalBudgetView.textContent = yen(total);
+
+    const pctSum = ordersState.reduce((s,o)=>s+toNum(o.pct),0);
+    elOrderPctSum.textContent = `${Math.round(pctSum*100)/100}%`;
+
+    // compute order amounts + rounding adjust into last row
+    const computed = ordersState.map(o => ({
+      ...o,
+      amt: roundYen(total * (toNum(o.pct)/100))
+    }));
+    const sumAmt = computed.reduce((s,o)=>s+o.amt,0);
+    const diff = total - sumAmt;
+    if (computed.length > 0){
+      computed[computed.length - 1].amt = clamp(computed[computed.length - 1].amt + diff, 0, total);
+    }
+
+    computed.forEach((o, idx) => {
+      const tr = document.createElement("tr");
+
+      const tdName = document.createElement("td");
+      tdName.textContent = o.name || "";
+      tdName.style.wordBreak = "break-word";
+
+      const tdPct = document.createElement("td");
+      const inPct = document.createElement("input");
+      inPct.type = "number";
+      inPct.step = "0.01";
+      inPct.min = "0";
+      inPct.value = String(toNum(o.pct) || "");
+      inPct.placeholder = "例）40";
+      tdPct.appendChild(inPct);
+
+      const tdAmt = document.createElement("td");
+      const divAmt = document.createElement("div");
+      divAmt.className = "money";
+      divAmt.textContent = yen(o.amt);
+      tdAmt.appendChild(divAmt);
+
+      tr.append(tdName, tdPct, tdAmt);
+      elOrdersTableBody.appendChild(tr);
+
+      // ★入力中は再レンダリングしない（フォーカスが飛ばない）
+      inPct.addEventListener("input", () => {
+        ordersState[idx].pct = toNum(inPct.value);
+        recalcOrdersInPlace();
+      });
+
+      inPct.addEventListener("keydown", (e) => {
+        if (e.key === "Enter"){
+          e.preventDefault();
+          const pctInputs = qsa("input[type='number']", elOrdersTableBody);
+          const i = pctInputs.indexOf(inPct);
+          const next = pctInputs[i+1];
+          if (next) next.focus();
+          else focusFirstPeriodStart();
+        }
+      });
+    });
+
+    updateStatus();
+  }
+
+  // ===== periods =====
+  function makePeriodRow(){
+    const tr = document.createElement("tr");
+
+    const tdS = document.createElement("td");
+    const inS = document.createElement("input");
+    inS.type = "date";
+    tdS.appendChild(inS);
+
+    const tdE = document.createElement("td");
+    const inE = document.createElement("input");
+    inE.type = "date";
+    tdE.appendChild(inE);
+
+    const tdPct = document.createElement("td");
+    const inPct = document.createElement("input");
+    inPct.type = "number";
+    inPct.step = "0.01";
+    inPct.min = "0";
+    inPct.placeholder = "例）10";
+    tdPct.appendChild(inPct);
+
+    const tdDel = document.createElement("td");
+    const btn = document.createElement("button");
+    btn.className = "ghost danger";
+    btn.textContent = "削除";
+    btn.style.padding = "8px 10px";
+    tdDel.appendChild(btn);
+
+    tr.append(tdS, tdE, tdPct, tdDel);
+
+    const onAny = () => updateStatus();
+
+    inS.addEventListener("input", () => { onAny(); if (inS.value) inE.focus(); });
+    inE.addEventListener("input", () => { onAny(); if (inE.value) inPct.focus(); });
+    inPct.addEventListener("input", onAny);
+
+    inPct.addEventListener("keydown", (e) => {
+      if (e.key === "Enter"){
+        e.preventDefault();
+        focusNextPeriodStart(tr);
+      }
+    });
+
+    inS.addEventListener("keydown", (e) => {
+      if (e.key === "Enter"){ e.preventDefault(); inE.focus(); }
+    });
+    inE.addEventListener("keydown", (e) => {
+      if (e.key === "Enter"){ e.preventDefault(); inPct.focus(); }
+    });
+
+    btn.addEventListener("click", () => { tr.remove(); updateStatus(); });
+
+    return tr;
+  }
+
+  function getPeriods(){
+    return qsa("tr", elPeriodsBody).map(tr => {
+      const ins = tr.querySelectorAll("input");
+      return { start: ins[0].value, end: ins[1].value, pct: toNum(ins[2].value) };
+    });
+  }
+
+  function calcPeriodAmounts(totalForOrder){
+    const periods = getPeriods();
+    const computed = periods.map(p => ({...p, amt: roundYen(totalForOrder * (p.pct/100))}));
+    const sumAmt = computed.reduce((s,p)=>s+p.amt,0);
+    const diff = totalForOrder - sumAmt;
+    if (computed.length > 0){
+      computed[computed.length - 1].amt = clamp(computed[computed.length - 1].amt + diff, 0, totalForOrder);
+    }
+    return computed;
+  }
+
+  // ===== status =====
+  function updateStatus(){
+    const total = toNum(elTotalBudget.value);
+    elTotalBudgetView.textContent = yen(total);
+
+    const periods = getPeriods();
+    const periodPctSum = periods.reduce((s,p)=>s+p.pct,0);
+    elPeriodPctSum.textContent = `${Math.round(periodPctSum*100)/100}%`;
+
+    const hasTotal = total > 0;
+    const hasOrders = ordersState.length > 0 && ordersState.every(o => (o.name || "").trim().length > 0);
+    const hasPeriods = periods.length > 0 && periods.every(p => !!p.start && !!p.end);
+
+    if (!hasTotal || !hasOrders || !hasPeriods){
+      elStatusDot.className = "dot bad";
+      const missing = [];
+      if (!hasTotal) missing.push("全体予算");
+      if (!hasOrders) missing.push("Order（名前）");
+      if (!hasPeriods) missing.push("期間（日付）");
+      elStatusText.textContent = `未入力：${missing.join(" / ")} を埋めてね`;
+      return;
+    }
+
+    const orderPctSum = ordersState.reduce((s,o)=>s+toNum(o.pct),0);
+    const near100 = (x) => Math.abs(x - 100) <= 0.01;
+
+    const warns = [];
+    if (!near100(orderPctSum)) warns.push(`Order%=${Math.round(orderPctSum*100)/100}%`);
+    if (!near100(periodPctSum)) warns.push(`期間%=${Math.round(periodPctSum*100)/100}%`);
+
+    if (warns.length){
+      elStatusDot.className = "dot";
+      elStatusText.textContent = `生成OK（注意）: ${warns.join(" / ")}（端数は最後に寄せる）`;
+    } else {
+      elStatusDot.className = "dot ok";
+      elStatusText.textContent = "OK：生成できます";
+    }
+  }
+
+  // ===== output =====
+  function generateTSV(){
+    // %入力中はin-place更新なので、最後に1回だけ整合
+    recalcOrdersInPlace();
+
+    const total = toNum(elTotalBudget.value);
+    const periods = getPeriods();
+
+    if (total <= 0) { alert("❶ 全体予算（NET）を入れてね"); return; }
+    if (ordersState.length === 0) { alert("❷ Orderを入力してね"); return; }
+    if (ordersState.some(o=>!o.name)) { alert("Order名が空の行があるよ"); return; }
+    if (periods.length === 0) { alert("❸ 期間を追加してね"); return; }
+    if (periods.some(p=>!p.start || !p.end)) { alert("期間の日付が空の行があるよ"); return; }
+
+    const orderAmts = ordersState.map(o => ({
+      name: o.name,
+      pct: toNum(o.pct),
+      amt: roundYen(total * (toNum(o.pct)/100))
+    }));
+    const sumOrder = orderAmts.reduce((s,o)=>s+o.amt,0);
+    const diffOrder = total - sumOrder;
+    if (orderAmts.length > 0){
+      orderAmts[orderAmts.length - 1].amt = clamp(orderAmts[orderAmts.length - 1].amt + diffOrder, 0, total);
+    }
+
+    const header = ["Order名","Flight Budget","Flight開始日","Flight終了日"].join("\t");
+    const lines = [header];
+
+    for (const o of orderAmts){
+      const pRows = calcPeriodAmounts(o.amt);
+      for (const p of pRows){
+        lines.push([
+          o.name,
+          yen(p.amt),
+          fmtYMD(p.start),
+          fmtYMD(p.end)
+        ].join("\t"));
+      }
+    }
+
+    elOutput.value = lines.join("\n");
+  }
+
+  async function copyOut(){
+    const tsv = elOutput.value.trim();
+    if (!tsv) { alert("先に転記用生成してね"); return; }
+    try{
+      await navigator.clipboard.writeText(tsv);
+      alert("コピーした！スプシに貼ってOK");
+    }catch(e){
+      elOutput.focus(); elOutput.select();
+      document.execCommand("copy");
+      alert("コピーした（互換モード）！スプシに貼ってOK");
+    }
+  }
+
+  // ===== events =====
+  // ❶ 全体予算 Enter → Orderへ
+  elTotalBudget.addEventListener("keydown", (e) => {
+    if (e.key === "Enter"){
+      e.preventDefault();
+      focusOrders();
+    }
+  });
+  elTotalBudget.addEventListener("input", () => {
+    // total変えたら金額だけ更新（%入力のフォーカス維持）
+    recalcOrdersInPlace();
+  });
+
+  // ❷ Order：inputで即反映
+  elOrdersBulk.addEventListener("input", () => {
+    ordersState = parseOrdersBulk(elOrdersBulk.value);
+    renderOrdersTable();
+  });
+
+  // ★ペースト直後に期間へフォーカス
+  elOrdersBulk.addEventListener("paste", () => {
+    setTimeout(() => {
+      focusFirstPeriodStart();
+    }, 0);
+  });
+
+  document.getElementById("clearOrdersBtn").addEventListener("click", () => {
+    ordersState = [];
+    elOrdersBulk.value = "";
+    renderOrdersTable();
+    focusOrders();
+  });
+
+  document.getElementById("addPeriodBtn").addEventListener("click", () => {
+    const tr = makePeriodRow();
+    elPeriodsBody.appendChild(tr);
+    updateStatus();
+    const start = tr.querySelector("input[type='date']");
+    if (start) start.focus();
+  });
+
+  document.getElementById("clearPeriodsBtn").addEventListener("click", () => {
+    elPeriodsBody.innerHTML = "";
+    updateStatus();
+    focusFirstPeriodStart();
+  });
+
+  document.getElementById("generateBtn").addEventListener("click", generateTSV);
+  document.getElementById("copyBtn").addEventListener("click", copyOut);
+  document.getElementById("clearOutputBtn").addEventListener("click", () => elOutput.value = "");
+
+  // ===== init =====
+  elPeriodsBody.appendChild(makePeriodRow());
+  renderOrdersTable();
+</script>
 </body>
 </html>
