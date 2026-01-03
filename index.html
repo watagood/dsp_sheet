@@ -1,309 +1,255 @@
-:root{
-  --bg1:#fff7fb;
-  --bg2:#f2f7ff;
-  --card:#ffffff;
-  --text:#111;
-  --muted:#5f6470;
-  --line:#e8e7ef;
-  --shadow: 0 18px 60px rgba(20, 20, 35, .08);
-  --shadow2: 0 10px 28px rgba(20, 20, 35, .08);
-  --radius: 22px;
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>AMC CSV → Excel（文字化け修正）</title>
 
-  /* accent */
-  --accent1:#ff4fa3;
-  --accent2:#6b7cff;
-  --accentGlow: rgba(255, 79, 163, .18);
-  --accentGlow2: rgba(107, 124, 255, .20);
+  <style>
+    :root{
+      --bg1:#fff3f8;
+      --bg2:#eef4ff;
+      --card:#ffffff;
+      --text:#111;
+      --muted:#5f6470;
+      --line:#e6e6f0;
+      --shadow: 0 18px 60px rgba(20,20,35,.08);
+      --shadow2: 0 10px 28px rgba(20,20,35,.08);
+      --radius:22px;
 
-  /* status */
-  --ok:#0a7;
-  --warn:#b70;
-  --bad:#c00;
-}
+      /* accent */
+      --accent1:#ff4fa3;
+      --accent2:#6b7cff;
+      --accentGlow1: rgba(255,79,163,.25);
+      --accentGlow2: rgba(107,124,255,.25);
+    }
 
-*{ box-sizing:border-box; }
-body{
-  margin:0;
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans JP", sans-serif;
-  color:var(--text);
-  background:
-    radial-gradient(1200px 800px at 10% 10%, var(--bg1), transparent 60%),
-    radial-gradient(1200px 800px at 90% 20%, var(--bg2), transparent 60%),
-    linear-gradient(180deg, #ffffff, #fbfbff);
-  min-height:100vh;
-}
+    *{box-sizing:border-box;}
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans JP", sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(1000px 700px at 8% 8%, var(--bg1), transparent 60%),
+        radial-gradient(1000px 700px at 92% 18%, var(--bg2), transparent 60%),
+        linear-gradient(180deg,#fff,#f9faff);
+      min-height:100vh;
+    }
 
-.wrap{
-  max-width:1100px;
-  margin:0 auto;
-  padding: 36px 18px;
-}
+    .wrap{
+      min-height:100vh;
+      display:flex;
+      justify-content:center;
+      padding:36px 18px;
+    }
 
-.top{
-  display:flex;
-  align-items:flex-end;
-  justify-content:space-between;
-  gap:16px;
-  flex-wrap:wrap;
-}
+    .card{
+      width:min(1100px,100%);
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:28px;
+      display:flex;
+      flex-direction:column;
+      gap:18px;
+    }
 
-h1{
-  margin:0;
-  font-size:22px;
-  letter-spacing:.2px;
-}
+    header{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
 
-.sub{
-  margin-top:6px;
-  color:var(--muted);
-  font-size:13px;
-  line-height:1.7;
-}
+    h1{
+      margin:0;
+      font-size:22px;
+      letter-spacing:.2px;
+    }
 
-.brand{
-  color: rgba(17,17,17,.55);
-  font-size: 10px;
-  letter-spacing: .2px;
-  background: rgba(255,255,255,.65);
-  border: 1px solid rgba(232,231,239,.75);
-  padding: 6px 8px;
-  border-radius: 999px;
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  box-shadow: 0 10px 20px rgba(20,20,35,.06);
-  user-select:none;
-}
+    .sub{
+      font-size:13px;
+      color:var(--muted);
+      line-height:1.7;
+    }
 
-/* card */
-.card{
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  padding: 26px;
-  margin-top:14px;
-}
+    .grid{
+      display:grid;
+      grid-template-columns:1.2fr .8fr;
+      gap:16px;
+    }
 
-/* sections row */
-.row{
-  display:flex;
-  gap:14px;
-  flex-wrap:wrap;
-  align-items:flex-end;
-}
+    .panel{
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:18px;
+      background:linear-gradient(180deg,#fff,#fcfcff);
+      box-shadow:var(--shadow2);
+    }
 
-/* field */
-.field{
-  flex:1;
-  min-width:240px;
-}
+    .label{
+      font-size:12px;
+      color:var(--muted);
+      margin-bottom:8px;
+    }
 
-label{
-  display:block;
-  font-size:12px;
-  color:var(--muted);
-  margin:0 0 8px;
-}
+    /* upload */
+    .drop{
+      border:2px dashed rgba(107,124,255,.55);
+      border-radius:18px;
+      padding:18px;
+      background:
+        radial-gradient(700px 160px at 10% 0%, rgba(255,79,163,.12), transparent 60%),
+        radial-gradient(700px 160px at 90% 0%, rgba(107,124,255,.14), transparent 60%),
+        linear-gradient(180deg,#fff,#fdf7ff);
+      box-shadow:0 12px 28px rgba(107,124,255,.10);
+      transition:.15s;
+    }
+    .drop.dragover{
+      border-color:#ff4fa3;
+      box-shadow:0 0 0 6px var(--accentGlow2),0 14px 34px rgba(107,124,255,.18);
+      transform:translateY(-1px);
+    }
 
-/* panel style */
-.panelLike{
-  border: 1px solid var(--line);
-  border-radius: 18px;
-  padding: 16px;
-  box-shadow: var(--shadow2);
-  background: linear-gradient(180deg, #ffffff, #fcfcff);
-}
+    input[type="file"]{
+      width:100%;
+      padding:12px;
+      font-size:14px;
+      border-radius:14px;
+      border:1px solid var(--line);
+      background:#fff;
+    }
 
-/* make specific cards look like panels */
-.highlightBudget,
-.outputCard,
-.card:not(.highlightBudget):not(.outputCard){
-  /* keep base .card but subtle */
-}
+    input[type="text"]{
+      width:100%;
+      padding:14px;
+      font-size:15px;
+      border-radius:14px;
+      border:1px solid var(--line);
+      background:#fff;
+      outline:none;
+    }
+    input[type="text"]:focus{
+      border-color:#b6a7ff;
+      box-shadow:0 0 0 4px rgba(182,167,255,.25);
+    }
 
-.highlightBudget{
-  border: 2px solid rgba(107,124,255,.30);
-  background:
-    radial-gradient(900px 220px at 8% 0%, rgba(255,79,163,.10), transparent 60%),
-    radial-gradient(900px 220px at 92% 0%, rgba(107,124,255,.12), transparent 60%),
-    linear-gradient(180deg, #ffffff, #fdf7ff);
-}
+    .hint{
+      font-size:12px;
+      color:var(--muted);
+      margin-top:8px;
+      line-height:1.6;
+    }
 
-/* inputs */
-input, textarea, button{
-  font: inherit;
-}
+    /* button */
+    button{
+      appearance:none;
+      border:0;
+      cursor:pointer;
+      padding:16px 22px;
+      border-radius:20px;
+      font-size:15px;
+      font-weight:900;
+      letter-spacing:.3px;
+      color:#fff;
+      background:linear-gradient(135deg,var(--accent1),var(--accent2));
+      box-shadow:
+        0 16px 36px rgba(107,124,255,.28),
+        0 12px 30px rgba(255,79,163,.22);
+      transition:.12s;
+    }
+    button:hover{
+      transform:translateY(-1px);
+      filter:brightness(1.04);
+    }
+    button:disabled{
+      opacity:.45;
+      cursor:not-allowed;
+      box-shadow:none;
+    }
 
-input[type="number"],
-input[type="date"],
-textarea{
-  width:100%;
-  border:1px solid var(--line);
-  border-radius:14px;
-  padding:12px 12px;
-  background:#fff;
-  outline:none;
-}
+    .actions{
+      display:flex;
+      gap:14px;
+      align-items:center;
+    }
 
-input[type="number"]:focus,
-input[type="date"]:focus,
-textarea:focus{
-  border-color:#b6a7ff;
-  box-shadow: 0 0 0 4px rgba(182,167,255,.18);
-}
+    .log{
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:16px;
+      background:#fff;
+      font-size:13px;
+      line-height:1.7;
+    }
 
-textarea{
-  min-height:130px;
-  resize:vertical;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-}
+    .ok{color:#0a7;font-weight:800;}
+    .warn{color:#b70;font-weight:800;}
+    .err{color:#c00;font-weight:800;}
+    .mono{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;}
 
-/* yen input */
-.yen{ position:relative; }
-.yen .prefix{
-  position:absolute;
-  left:12px;
-  top:50%;
-  transform:translateY(-50%);
-  color:var(--muted);
-  font-weight:900;
-  pointer-events:none;
-}
-.yen input{ padding-left:28px; }
+    .credit{
+      position:fixed;
+      right:14px;
+      bottom:10px;
+      font-size:10px;
+      color:rgba(0,0,0,.55);
+      background:rgba(255,255,255,.7);
+      border:1px solid rgba(230,230,240,.9);
+      padding:6px 8px;
+      border-radius:999px;
+      backdrop-filter:blur(6px);
+      pointer-events:none;
+    }
 
-/* tables */
-.grid{
-  width:100%;
-  border-collapse:collapse;
-  overflow:hidden;
-  border-radius:18px;
-  border: 1px solid var(--line);
-  background:#fff;
-  box-shadow: var(--shadow2);
-}
+    @media(max-width:900px){
+      .grid{grid-template-columns:1fr;}
+      .card{padding:20px;}
+      h1{font-size:20px;}
+    }
+  </style>
+</head>
 
-.grid th,.grid td{
-  border-bottom:1px solid var(--line);
-  padding:12px 12px;
-  text-align:left;
-  font-size:13px;
-  vertical-align:middle;
-}
-.grid th{
-  color:var(--muted);
-  font-weight:900;
-  background: linear-gradient(180deg, #ffffff, #fcfcff);
-}
-.grid tr:last-child td{ border-bottom:none; }
+<body>
+  <div class="credit">watagood · miyu.watanabe</div>
 
-.money{
-  font-variant-numeric: tabular-nums;
-  white-space:nowrap;
-}
+  <div class="wrap">
+    <div class="card">
+      <header>
+        <h1>AMC CSV → Excel（文字化け修正）</h1>
+        <p class="sub">
+          CSVをExcelで開ける <span class="mono">.xls</span> に変換します（ローカル処理のみ）。<br>
+          Excel警告が出たら <b>OK</b> を押してください。
+        </p>
+      </header>
 
-/* mini text */
-.mini{
-  font-size:12px;
-  color:var(--muted);
-  line-height:1.6;
-}
+      <div class="grid">
+        <section class="panel">
+          <div class="label">CSVアップロード（複数OK）</div>
+          <div id="drop" class="drop">
+            <input id="files" type="file" multiple accept=".csv,.tsv,text/csv,text/tab-separated-values">
+            <div class="hint">ドラッグ＆ドロップ対応。文字コードは自動判定。</div>
+          </div>
+          <div id="fileInfo" class="hint"></div>
+        </section>
 
-/* buttons: strong */
-button{
-  appearance:none;
-  border:0;
-  cursor:pointer;
-  padding: 14px 16px;
-  border-radius: 18px;
-  font-weight: 900;
-  font-size: 14px;
-  letter-spacing: .3px;
-  color:#fff;
-  background: linear-gradient(135deg, var(--accent1), var(--accent2));
-  box-shadow:
-    0 14px 34px rgba(107,124,255,.22),
-    0 10px 26px rgba(255,79,163,.18);
-  transition: transform .08s ease, filter .08s ease, opacity .08s ease;
-}
-button:hover{
-  transform: translateY(-1px);
-  filter: brightness(1.02);
-}
-button:disabled{
-  opacity:.45;
-  cursor:not-allowed;
-  transform:none;
-  filter:none;
-}
+        <section class="panel">
+          <div class="label">出力名デフォルト</div>
+          <input id="defaultName" type="text" value="amc_report">
+          <div class="hint">
+            複数時：<span class="mono">_01, _02 …</span> が自動付与
+          </div>
+        </section>
+      </div>
 
-.ghost{
-  background:#fff;
-  color:#2a2a3a;
-  border:1px solid var(--line);
-  box-shadow: 0 10px 18px rgba(20,20,35,.06);
-}
-.ghost:hover{
-  filter:none;
-  transform: translateY(-1px);
-  border-color: rgba(107,124,255,.35);
-}
-.danger{
-  border-color: rgba(255,79,163,.35);
-}
+      <div class="actions">
+        <button id="convert" disabled>Excelに変換してダウンロード</button>
+      </div>
 
-/* pills/badges */
-.pill{
-  display:inline-flex;
-  align-items:center;
-  gap:8px;
-  font-size:12px;
-  color:var(--muted);
-}
-.dot{ width:8px; height:8px; border-radius:999px; background: #b70; }
-.dot.ok{ background: var(--ok); }
-.dot.bad{ background: var(--bad); }
+      <div id="log" class="log">ファイルを選ぶと変換できます。</div>
+    </div>
+  </div>
 
-.kpi{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
-.badge{
-  display:inline-flex;
-  align-items:baseline;
-  gap:8px;
-  border: 1px solid var(--line);
-  border-radius:999px;
-  padding: 10px 12px;
-  background: linear-gradient(135deg, #ffe5f2, #e2e9ff);
-  box-shadow: 0 10px 18px rgba(116,84,255,.08);
-}
-.badge b{ font-size:16px; }
-.badge small{ color:#2a2a3a; font-weight:900; }
-
-/* output emphasis */
-.outputCard.highlightOutput,
-.highlightOutput{
-  border: 2px solid rgba(107,124,255,.35);
-  background:
-    radial-gradient(900px 220px at 8% 0%, rgba(107,124,255,.10), transparent 60%),
-    radial-gradient(900px 220px at 92% 0%, rgba(255,79,163,.10), transparent 60%),
-    linear-gradient(180deg, #ffffff, #fcfcff);
-}
-
-.outputTitle{
-  font-size:18px;
-  font-weight:900;
-  letter-spacing:.2px;
-  color:#2a2a3a;
-}
-
-.outputArea{
-  min-height:190px;
-  border: 2px solid rgba(107,124,255,.25);
-  background: #fff;
-  box-shadow: 0 10px 28px rgba(107,124,255,.08);
-}
-
-/* responsive */
-@media (max-width: 860px){
-  .wrap{ padding: 24px 14px; }
-  .card{ padding: 18px; }
-  h1{ font-size:20px; }
-}
+  <!-- ⚠️ JSは元コードそのまま入れてください（省略せず貼る） -->
+</body>
+</html>
