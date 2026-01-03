@@ -7,7 +7,7 @@
 
   <style>
     :root{
-      /* ===== Light / Pink-Purple theme (ref) ===== */
+      /* ===== Light / Pink-Purple theme ===== */
       --bg1:#fff7fb;
       --bg2:#f2f7ff;
       --card:#ffffff;
@@ -28,6 +28,8 @@
       --warn:#ffda6e;
       --ok:#3ccf88;
       --bad:#ff6e6e;
+
+      --focusRing: 0 0 0 4px rgba(182,167,255,.18);
     }
 
     *{
@@ -51,6 +53,75 @@
     .sub{color:var(--muted);margin-top:6px;font-size:13px;line-height:1.6;}
     .brand{color:rgba(17,17,17,.55);font-size:12px;}
 
+    /* ===== Stepper (sticky) ===== */
+    .stepperWrap{
+      position: sticky;
+      top: 10px;
+      z-index: 20;
+      margin-top: 14px;
+    }
+    .stepper{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255,255,255,.76);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      box-shadow: 0 12px 28px rgba(20,20,35,.08);
+    }
+    .chip{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, #fff, #fcfcff);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing:.02em;
+      user-select:none;
+      cursor: default;
+      transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease, color .12s ease;
+    }
+    .chip .num{
+      width: 22px;
+      height: 22px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      border-radius: 999px;
+      font-size: 12px;
+      color:#2a2a3a;
+      border:1px solid var(--line);
+      background: linear-gradient(135deg, #ffe5f2, #e2e9ff);
+      box-shadow: 0 10px 18px rgba(116,84,255,.08);
+    }
+    .chip.done{
+      color:#1f3d2f;
+      border-color: rgba(60,207,136,.35);
+      background: linear-gradient(180deg, #ffffff, rgba(60,207,136,.06));
+    }
+    .chip.done .num{
+      background: linear-gradient(135deg, rgba(60,207,136,.18), rgba(107,124,255,.16));
+    }
+    .chip.active{
+      color:#1b1b2a;
+      border-color: rgba(107,124,255,.45);
+      box-shadow: 0 0 0 6px rgba(107,124,255,.10), 0 14px 32px rgba(107,124,255,.12);
+      transform: translateY(-1px);
+    }
+    .chip.active .num{
+      background: linear-gradient(135deg, rgba(255,79,163,.22), rgba(107,124,255,.20));
+      border-color: rgba(107,124,255,.35);
+    }
+
+    /* ===== Cards ===== */
     .card{
       background: var(--card);
       border:1px solid var(--line);
@@ -58,6 +129,21 @@
       padding:16px;
       margin-top:14px;
       box-shadow: var(--shadow2);
+      transition: box-shadow .15s ease, border-color .15s ease, transform .15s ease;
+    }
+    .card:hover{
+      box-shadow: 0 16px 34px rgba(20,20,35,.09);
+    }
+
+    /* "Next here" highlight */
+    .card.isNext{
+      border: 2px solid rgba(107,124,255,.45);
+      box-shadow: 0 0 0 7px rgba(107,124,255,.10), var(--shadow);
+      background:
+        radial-gradient(900px 220px at 10% 0%, rgba(107,124,255,.10), transparent 60%),
+        radial-gradient(900px 220px at 90% 0%, rgba(255,79,163,.08), transparent 60%),
+        linear-gradient(180deg, #ffffff, #fbfbff);
+      transform: translateY(-1px);
     }
 
     .row{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;}
@@ -73,10 +159,9 @@
       border-radius:14px;
       outline:none;
     }
-
     input:focus,textarea:focus{
       border-color: rgba(107,124,255,.55);
-      box-shadow: 0 0 0 4px rgba(182,167,255,.18);
+      box-shadow: var(--focusRing);
     }
 
     button{
@@ -145,6 +230,15 @@
       background: linear-gradient(180deg, #ffffff, #fcfcff);
     }
     .grid tr:last-child td{border-bottom:none;}
+    .grid tbody tr:hover td{
+      background: rgba(107,124,255,.035);
+    }
+
+    /* Make editable column "feel editable" (visual only) */
+    .grid td.editCell{
+      background: radial-gradient(900px 220px at 10% 0%, rgba(107,124,255,.06), transparent 60%),
+                  linear-gradient(180deg, #fff, #fcfcff);
+    }
 
     .mini{font-size:11px;color:var(--muted);line-height:1.45;}
 
@@ -178,7 +272,25 @@
     }
     .yen input{padding-left:28px;}
 
-    /* Highlight: budget card */
+    /* ===== Special sections ===== */
+    .sectionTitle{
+      display:flex;
+      align-items:baseline;
+      justify-content:space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .sectionTitle b{
+      font-size: 14px;
+      letter-spacing:.02em;
+    }
+    .sectionHint{
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    /* Budget highlight */
     .highlightBudget{
       background:
         radial-gradient(900px 220px at 10% 0%, rgba(255,79,163,.10), transparent 60%),
@@ -186,6 +298,44 @@
         linear-gradient(180deg, #ffffff, #fdf7ff);
       border: 2px solid rgba(107,124,255,.45);
       box-shadow: var(--shadow);
+    }
+
+    /* Orders bulk "paste box" look */
+    .bulkBox{
+      border: 2px dashed rgba(107,124,255,.45);
+      border-radius: 18px;
+      padding: 14px;
+      background:
+        radial-gradient(800px 160px at 10% 0%, rgba(255,79,163,.08), transparent 60%),
+        radial-gradient(800px 160px at 90% 0%, rgba(107,124,255,.10), transparent 60%),
+        linear-gradient(180deg, #ffffff, #fdf7ff);
+      box-shadow: 0 10px 28px rgba(107,124,255,.08);
+    }
+    .bulkBox .mini{
+      margin-top: 8px;
+    }
+    .bulkLabel{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+    .bulkLabel .tag{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.8);
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 900;
+    }
+    .bulkLabel .tag::before{
+      content:"📋";
+      font-size: 12px;
     }
 
     /* Output highlight */
@@ -214,6 +364,19 @@
       border:2px solid rgba(167,139,250,.35);
       background: linear-gradient(180deg, #ffffff, #fcfcff);
     }
+    .micro{
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+    .micro b{color:#2a2a3a;}
+
+    /* Hide/compact on small screens */
+    @media (max-width: 860px){
+      .stepperWrap{ top: 8px; }
+      .chip{ padding: 7px 10px; }
+      .chip .num{ width: 20px; height: 20px; }
+    }
   </style>
 </head>
 
@@ -222,34 +385,47 @@
     <div class="top">
       <div>
         <h1>次月継続 転記ツール（NET / 一括Order / ¥出力）</h1>
-        <div class="sub">
-          ❶全体予算（NET） → ❷Order配分% → ❸期間% → ❹転記用生成（¥付き）
-        </div>
+        <div class="sub">❶全体予算（NET） → ❷Order配分% → ❸期間% → ❹転記用生成（¥付き）</div>
       </div>
       <div class="brand">made by miyu.watanabe</div>
     </div>
 
+    <!-- Sticky Stepper -->
+    <div class="stepperWrap" aria-hidden="true">
+      <div class="stepper">
+        <div id="chip1" class="chip"><span class="num">1</span> 予算</div>
+        <div id="chip2" class="chip"><span class="num">2</span> Order</div>
+        <div id="chip3" class="chip"><span class="num">3</span> 期間</div>
+        <div id="chip4" class="chip"><span class="num">4</span> 出力</div>
+      </div>
+    </div>
+
     <!-- ❶ 全体予算（NET） -->
-    <div class="card highlightBudget">
+    <div class="card highlightBudget" id="card1">
       <div class="row">
         <div class="field">
           <label style="font-weight:900; font-size:14px;">❶ 全体予算（NET）</label>
           <div class="yen">
             <span class="prefix">¥</span>
-            <input id="totalBudget" type="number" min="0" step="1" placeholder="例）500000" />
+            <input id="totalBudget" type="number" min="0" step="1" placeholder="例）500000（NET）" />
+          </div>
+          <div class="mini" style="margin-top:8px;">
+            入力したら <b>Enter</b> で次（Order）へ
           </div>
         </div>
 
         <div class="field">
-          <label>ステータス（%合計が一瞬で分かる）</label>
+          <label>ステータス（次にやること）</label>
           <div class="kpi">
             <div class="pill"><span id="statusDot" class="dot"></span><span id="statusText">入力してね</span></div>
           </div>
+
           <div class="kpi" style="margin-top:10px;">
             <div class="badge"><small>Order%</small><b id="orderPctSum">0%</b></div>
             <div class="badge"><small>期間%</small><b id="periodPctSum">0%</b></div>
             <div class="badge"><small>NET合計</small><b id="totalBudgetView">¥0</b></div>
           </div>
+
           <div class="mini" style="margin-top:8px;">
             ※ %が100%じゃなくても生成はできる（端数は最後の行に寄せて帳尻合わせ）
           </div>
@@ -257,23 +433,31 @@
       </div>
     </div>
 
-    <!-- ❷ Order（テキスト一括 / 自動反映） -->
-    <div class="card">
+    <!-- ❷ Order -->
+    <div class="card" id="card2">
       <div class="row" style="justify-content:space-between;align-items:center;">
-        <div>
-          <div style="font-weight:900;">❷ Order（改行で別Order）</div>
-          <div class="mini">書式例：<b>Order名,40</b>（区切りは「,」or「タブ」or「スペース」でもOK）</div>
+        <div class="sectionTitle">
+          <div>
+            <b>❷ Order（改行で別Order）</b>
+            <div class="sectionHint">書式例：<b>Order名,40</b>（区切りは「,」or「タブ」or「スペース」でもOK）</div>
+          </div>
         </div>
         <div class="right">
           <button class="ghost danger bigBtn" id="clearOrdersBtn">Order全消し</button>
         </div>
       </div>
 
-      <div style="margin-top:10px;">
-        <label>Order一括入力</label>
+      <div style="margin-top:10px;" class="bulkBox">
+        <div class="bulkLabel">
+          <label style="margin:0;">Order一括入力</label>
+          <div class="tag">ここに貼る</div>
+        </div>
         <textarea id="ordersBulk" placeholder="例）
 kagome_Vendor_almond breeze_Performance+,40
 kagome_Vendor_これいち_Performance+,60"></textarea>
+        <div class="mini">
+          ヒント：貼り付けたら自動で表に反映 → そのまま期間へ進める
+        </div>
       </div>
 
       <div style="margin-top:10px; overflow:auto;">
@@ -288,16 +472,23 @@ kagome_Vendor_これいち_Performance+,60"></textarea>
           <tbody id="ordersTableBody"></tbody>
         </table>
       </div>
+
+      <div class="micro" style="margin-top:10px;">
+        <b>編集するのは「配分%」だけ</b>。金額は自動で追従します。
+      </div>
     </div>
 
     <!-- ❸ 期間 -->
-    <div class="card">
+    <div class="card" id="card3">
       <div class="row" style="justify-content:space-between;align-items:center;">
-        <div>
-          <div style="font-weight:900;">❸ 期間</div>
+        <div class="sectionTitle">
+          <div>
+            <b>❸ 期間</b>
+            <div class="sectionHint">開始 → 終了 → % の順で入力（Enterで次行を追加）</div>
+          </div>
         </div>
         <div class="right">
-          <button class="primary bigBtn" id="addPeriodBtn">＋ 期間追加</button>
+          <button class="primary bigBtn" id="addPeriodBtn">＋ 期間をもう1つ追加</button>
           <button class="ghost danger bigBtn" id="clearPeriodsBtn">期間全消し</button>
         </div>
       </div>
@@ -306,9 +497,9 @@ kagome_Vendor_これいち_Performance+,60"></textarea>
         <table class="grid">
           <thead>
             <tr>
-              <th style="min-width:170px;">Flight開始日</th>
-              <th style="min-width:170px;">Flight終了日</th>
-              <th style="min-width:140px;">配分 %</th>
+              <th style="min-width:170px;">START（Flight開始日）</th>
+              <th style="min-width:170px;">END（Flight終了日）</th>
+              <th style="min-width:140px;">期間配分 %</th>
               <th style="width:1%;">削除</th>
             </tr>
           </thead>
@@ -318,15 +509,19 @@ kagome_Vendor_これいち_Performance+,60"></textarea>
     </div>
 
     <!-- ❹ Output -->
-    <div class="card outputCard highlightOutput">
+    <div class="card outputCard highlightOutput" id="card4">
       <div class="row" style="justify-content:space-between;align-items:center;">
         <div>
           <div class="outputTitle">❹ 貼り付け用アウトプット（転記用 / TSV / ¥付き）</div>
-          <div class="mini">Order×期間で行展開。Flight Budgetは必ず <b>¥</b> 表記。</div>
+          <div class="micro">
+            スプシにそのまま貼るだけ（列：<b>Order名 / Flight Budget / 開始 / 終了</b>）
+          </div>
+          <div class="mini" style="margin-top:6px;">コツ：生成後はテキスト欄をクリック→必要なら全選択して貼り付けでもOK</div>
         </div>
+
         <div class="right">
-          <button class="primary bigBtn" id="generateBtn">転記用生成</button>
-          <button class="primary bigBtn" id="copyBtn">コピー</button>
+          <button class="primary bigBtn" id="generateBtn">① 転記用生成</button>
+          <button class="primary bigBtn" id="copyBtn">② コピー</button>
           <button class="ghost danger bigBtn" id="clearOutputBtn">消す</button>
         </div>
       </div>
@@ -365,6 +560,20 @@ kagome_Vendor_これいち_Performance+,60"></textarea>
   const elStatusText = document.getElementById("statusText");
 
   const elOutput = document.getElementById("output");
+
+  // stepper + cards
+  const chips = [
+    document.getElementById("chip1"),
+    document.getElementById("chip2"),
+    document.getElementById("chip3"),
+    document.getElementById("chip4")
+  ];
+  const cards = [
+    document.getElementById("card1"),
+    document.getElementById("card2"),
+    document.getElementById("card3"),
+    document.getElementById("card4")
+  ];
 
   // ===== state =====
   let ordersState = []; // { name, pct }
@@ -486,6 +695,7 @@ kagome_Vendor_これいち_Performance+,60"></textarea>
       tdName.style.wordBreak = "break-word";
 
       const tdPct = document.createElement("td");
+      tdPct.className = "editCell";
       const inPct = document.createElement("input");
       inPct.type = "number";
       inPct.step = "0.01";
@@ -539,6 +749,7 @@ kagome_Vendor_これいち_Performance+,60"></textarea>
     tdE.appendChild(inE);
 
     const tdPct = document.createElement("td");
+    tdPct.className = "editCell";
     const inPct = document.createElement("input");
     inPct.type = "number";
     inPct.step = "0.01";
@@ -598,6 +809,22 @@ kagome_Vendor_これいち_Performance+,60"></textarea>
     return computed;
   }
 
+  // ===== stepper + "next card" visuals =====
+  function setStepUI(activeStepIndex, doneUpToIndex){
+    // clear
+    chips.forEach(c => c.classList.remove("active", "done"));
+    cards.forEach(c => c.classList.remove("isNext"));
+
+    // done state
+    for (let i=0; i<=doneUpToIndex; i++){
+      if (chips[i]) chips[i].classList.add("done");
+    }
+
+    // active + highlight card
+    if (chips[activeStepIndex]) chips[activeStepIndex].classList.add("active");
+    if (cards[activeStepIndex]) cards[activeStepIndex].classList.add("isNext");
+  }
+
   // ===== status =====
   function updateStatus(){
     const total = toNum(elTotalBudget.value);
@@ -611,13 +838,31 @@ kagome_Vendor_これいち_Performance+,60"></textarea>
     const hasOrders = ordersState.length > 0 && ordersState.every(o => (o.name || "").trim().length > 0);
     const hasPeriods = periods.length > 0 && periods.every(p => !!p.start && !!p.end);
 
+    // Decide next step (visual guidance only)
+    // 0:budget, 1:orders, 2:periods, 3:output
+    let nextStep = 0;
+    let doneUpTo = -1;
+
+    if (hasTotal) { doneUpTo = 0; nextStep = 1; }
+    if (hasTotal && hasOrders) { doneUpTo = 1; nextStep = 2; }
+    if (hasTotal && hasOrders && hasPeriods) { doneUpTo = 2; nextStep = 3; }
+
+    // When everything exists, "Output" is active
+    setStepUI(nextStep, doneUpTo);
+
     if (!hasTotal || !hasOrders || !hasPeriods){
       elStatusDot.className = "dot bad";
-      const missing = [];
-      if (!hasTotal) missing.push("全体予算");
-      if (!hasOrders) missing.push("Order（名前）");
-      if (!hasPeriods) missing.push("期間（日付）");
-      elStatusText.textContent = `未入力：${missing.join(" / ")} を埋めてね`;
+
+      // More directive, less "status"
+      if (!hasTotal){
+        elStatusText.textContent = `次は「全体予算（NET）」を入力してね`;
+      } else if (!hasOrders){
+        elStatusText.textContent = `次は「Orderの貼り付け」だよ（改行で複数OK）`;
+      } else if (!hasPeriods){
+        elStatusText.textContent = `次は「期間の開始日→終了日」を入れてね`;
+      } else {
+        elStatusText.textContent = `次に進める準備をしてね`;
+      }
       return;
     }
 
@@ -630,10 +875,10 @@ kagome_Vendor_これいち_Performance+,60"></textarea>
 
     if (warns.length){
       elStatusDot.className = "dot";
-      elStatusText.textContent = `生成OK（注意）: ${warns.join(" / ")}（端数は最後に寄せる）`;
+      elStatusText.textContent = `OK（注意）: ${warns.join(" / ")} → 生成してOK（端数は最後に寄せる）`;
     } else {
       elStatusDot.className = "dot ok";
-      elStatusText.textContent = "OK：生成できます";
+      elStatusText.textContent = "OK：あとは「転記用生成」→「コピー」だけ";
     }
   }
 
@@ -678,6 +923,7 @@ kagome_Vendor_これいち_Performance+,60"></textarea>
     }
 
     elOutput.value = lines.join("\n");
+    updateStatus(); // keep UI guidance fresh
   }
 
   async function copyOut(){
@@ -747,6 +993,7 @@ kagome_Vendor_これいち_Performance+,60"></textarea>
   // ===== init =====
   elPeriodsBody.appendChild(makePeriodRow());
   renderOrdersTable();
+  updateStatus();
 </script>
 </body>
 </html>
