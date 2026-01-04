@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>次月継続 転記ツール（NET / 一括Order / ¥出力）</title>
+  <title>ジゲケイ！DSP ver 🪄🫧</title>
 
   <style>
     :root{
@@ -17,12 +17,9 @@
 
       --shadow: 0 18px 60px rgba(20, 20, 35, .08);
       --shadow2: 0 10px 28px rgba(20, 20, 35, .08);
-      --radius: 22px;
 
       --accent1:#ff4fa3;
       --accent2:#6b7cff;
-      --accentGlow1: rgba(255, 79, 163, .18);
-      --accentGlow2: rgba(107, 124, 255, .20);
 
       /* status colors */
       --warn:#ffda6e;
@@ -49,8 +46,23 @@
 
     .wrap{max-width:1100px;margin:28px auto;padding:0 16px;}
     .top{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;}
-    h1{margin:0;font-size:20px;letter-spacing:.02em;}
-    .sub{color:var(--muted);margin-top:6px;font-size:13px;line-height:1.6;}
+
+    /* ===== Title (cute + bold) ===== */
+    h1{
+      margin:0;
+      font-size:22px;
+      font-weight:1000;
+      letter-spacing:.03em;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      line-height:1.1;
+    }
+    .titleEmoji{
+      filter: drop-shadow(0 10px 18px rgba(107,124,255,.18));
+      font-size:20px;
+    }
+    .sub{color:var(--muted);margin-top:8px;font-size:13px;line-height:1.6;}
     .brand{color:rgba(17,17,17,.55);font-size:12px;}
 
     /* ===== Stepper (sticky) ===== */
@@ -134,8 +146,6 @@
     .card:hover{
       box-shadow: 0 16px 34px rgba(20,20,35,.09);
     }
-
-    /* "Next here" highlight */
     .card.isNext{
       border: 2px solid rgba(107,124,255,.45);
       box-shadow: 0 0 0 7px rgba(107,124,255,.10), var(--shadow);
@@ -162,6 +172,17 @@
     input:focus,textarea:focus{
       border-color: rgba(107,124,255,.55);
       box-shadow: var(--focusRing);
+    }
+
+    /* ===== remove number spinners (arrows) ===== */
+    input[type="number"]{
+      -moz-appearance: textfield;
+      appearance: textfield;
+    }
+    input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button{
+      -webkit-appearance: none;
+      margin: 0;
     }
 
     button{
@@ -228,19 +249,57 @@
       color:var(--muted);
       font-weight:900;
       background: linear-gradient(180deg, #ffffff, #fcfcff);
+      white-space:nowrap;
     }
     .grid tr:last-child td{border-bottom:none;}
     .grid tbody tr:hover td{
       background: rgba(107,124,255,.035);
     }
-
-    /* Make editable column "feel editable" (visual only) */
     .grid td.editCell{
       background: radial-gradient(900px 220px at 10% 0%, rgba(107,124,255,.06), transparent 60%),
                   linear-gradient(180deg, #fff, #fcfcff);
     }
 
-    .mini{font-size:11px;color:var(--muted);line-height:1.45;}
+    /* ===== Compact grid ===== */
+    .grid.compact th, .grid.compact td{
+      padding: 8px 10px;
+      font-size: 12.5px;
+    }
+    .numCol{
+      text-align:right;
+      font-variant-numeric: tabular-nums;
+      white-space:nowrap;
+    }
+
+    /* ===== Spreadsheet-ish % cell ===== */
+    .pctWrap{ display:flex; align-items:center; gap:6px; justify-content:flex-end; }
+    .cellInput{
+      width: 88px;
+      border: 1px solid transparent;
+      background: transparent;
+      padding: 6px 8px;
+      border-radius: 10px;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+      box-shadow:none;
+    }
+    .pctCell:hover .cellInput{
+      background: rgba(107,124,255,.04);
+      border-color: rgba(107,124,255,.10);
+    }
+    .cellInput:focus{
+      background: rgba(107,124,255,.08);
+      border-color: rgba(107,124,255,.55);
+      box-shadow: 0 0 0 4px rgba(107,124,255,.16);
+    }
+    .pctSuffix{
+      flex:0 0 auto;
+      font-size: 12px;
+      font-weight: 900;
+      color: rgba(95,100,112,.85);
+      user-select:none;
+    }
+    .money{font-variant-numeric: tabular-nums; white-space:nowrap;}
 
     .pill{display:inline-flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);}
     .dot{width:8px;height:8px;border-radius:999px;background:var(--warn);}
@@ -260,7 +319,6 @@
     }
     .badge b{font-size:16px;}
     .badge small{color:var(--muted);font-weight:900;}
-    .money{font-variant-numeric: tabular-nums; white-space:nowrap;}
     .right{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
     .bigBtn{padding:12px 14px; border-radius:16px;}
 
@@ -272,7 +330,6 @@
     }
     .yen input{padding-left:28px;}
 
-    /* ===== Special sections ===== */
     .sectionTitle{
       display:flex;
       align-items:baseline;
@@ -311,9 +368,6 @@
         linear-gradient(180deg, #ffffff, #fdf7ff);
       box-shadow: 0 10px 28px rgba(107,124,255,.08);
     }
-    .bulkBox .mini{
-      margin-top: 8px;
-    }
     .bulkLabel{
       display:flex;
       align-items:center;
@@ -338,7 +392,7 @@
       font-size: 12px;
     }
 
-    /* Output highlight */
+    /* Output card */
     .outputCard{
       border:2px solid rgba(107,124,255,.45);
       box-shadow: var(--shadow);
@@ -359,23 +413,56 @@
       letter-spacing:.02em;
       color:#6b5cff;
     }
-    .outputArea{
-      min-height:190px;
-      border:2px solid rgba(167,139,250,.35);
+
+    /* ===== Sheet-like preview ===== */
+    .sheetWrap{
+      border:1px solid var(--line);
+      border-radius: 16px;
+      overflow:auto;
+      background: rgba(255,255,255,.75);
+      box-shadow: 0 10px 22px rgba(20,20,35,.06);
+    }
+    .sheet{
+      width:100%;
+      border-collapse: collapse;
+      font-size: 12.5px;
+      background:#fff;
+    }
+    .sheet th, .sheet td{
+      border-bottom:1px solid var(--line);
+      border-right:1px solid var(--line);
+      padding: 8px 10px;
+      white-space: nowrap;
+      vertical-align: middle;
+    }
+    .sheet th:last-child, .sheet td:last-child{ border-right:none; }
+    .sheet thead th{
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      color: var(--muted);
+      font-weight: 900;
       background: linear-gradient(180deg, #ffffff, #fcfcff);
     }
-    .micro{
-      font-size: 12px;
-      color: var(--muted);
-      line-height: 1.6;
+    .sheet tbody tr:hover td{
+      background: rgba(107,124,255,.045);
     }
-    .micro b{color:#2a2a3a;}
+    .sheet td.moneyCell{
+      text-align:right;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+    .sheetEmpty{
+      padding: 12px !important;
+      color: var(--muted);
+      font-size: 12px;
+    }
 
-    /* Hide/compact on small screens */
     @media (max-width: 860px){
       .stepperWrap{ top: 8px; }
       .chip{ padding: 7px 10px; }
       .chip .num{ width: 20px; height: 20px; }
+      .cellInput{ width: 78px; }
     }
   </style>
 </head>
@@ -384,8 +471,8 @@
   <div class="wrap">
     <div class="top">
       <div>
-        <h1>次月継続 転記ツール（NET / 一括Order / ¥出力）</h1>
-        <div class="sub">❶全体予算（NET） → ❷Order配分% → ❸期間% → ❹転記用生成（¥付き）</div>
+        <h1><span class="titleEmoji">🪄</span> ジゲケイ！DSP ver <span class="titleEmoji">🫧</span></h1>
+        <div class="sub">❶全体予算（NET） → ❷Order配分% → ❸期間% → ❹転記用生成</div>
       </div>
       <div class="brand">made by miyu.watanabe</div>
     </div>
@@ -409,13 +496,10 @@
             <span class="prefix">¥</span>
             <input id="totalBudget" type="number" min="0" step="1" placeholder="例）500000（NET）" />
           </div>
-          <div class="mini" style="margin-top:8px;">
-            入力したら <b>Enter</b> で次（Order）へ
-          </div>
         </div>
 
         <div class="field">
-          <label>ステータス（次にやること）</label>
+          <label>ステータス</label>
           <div class="kpi">
             <div class="pill"><span id="statusDot" class="dot"></span><span id="statusText">入力してね</span></div>
           </div>
@@ -424,10 +508,6 @@
             <div class="badge"><small>Order%</small><b id="orderPctSum">0%</b></div>
             <div class="badge"><small>期間%</small><b id="periodPctSum">0%</b></div>
             <div class="badge"><small>NET合計</small><b id="totalBudgetView">¥0</b></div>
-          </div>
-
-          <div class="mini" style="margin-top:8px;">
-            ※ %が100%じゃなくても生成はできる（端数は最後の行に寄せて帳尻合わせ）
           </div>
         </div>
       </div>
@@ -438,8 +518,8 @@
       <div class="row" style="justify-content:space-between;align-items:center;">
         <div class="sectionTitle">
           <div>
-            <b>❷ Order（改行で別Order）</b>
-            <div class="sectionHint">書式例：<b>Order名,40</b>（区切りは「,」or「タブ」or「スペース」でもOK）</div>
+            <b>❷ Order</b>
+            <div class="sectionHint">書式例：<b>Order名,40</b></div>
           </div>
         </div>
         <div class="right">
@@ -455,26 +535,19 @@
         <textarea id="ordersBulk" placeholder="例）
 kagome_Vendor_almond breeze_Performance+,40
 kagome_Vendor_これいち_Performance+,60"></textarea>
-        <div class="mini">
-          ヒント：貼り付けたら自動で表に反映 → そのまま期間へ進める
-        </div>
       </div>
 
       <div style="margin-top:10px; overflow:auto;">
-        <table class="grid">
+        <table class="grid compact">
           <thead>
             <tr>
               <th style="min-width:420px;">Order名</th>
-              <th style="min-width:140px;">配分 %（編集可）</th>
-              <th style="min-width:220px;">Order金額（¥ / 自動）</th>
+              <th class="numCol" style="min-width:160px;">配分</th>
+              <th class="numCol" style="min-width:220px;">Order金額</th>
             </tr>
           </thead>
           <tbody id="ordersTableBody"></tbody>
         </table>
-      </div>
-
-      <div class="micro" style="margin-top:10px;">
-        <b>編集するのは「配分%」だけ</b>。金額は自動で追従します。
       </div>
     </div>
 
@@ -484,22 +557,22 @@ kagome_Vendor_これいち_Performance+,60"></textarea>
         <div class="sectionTitle">
           <div>
             <b>❸ 期間</b>
-            <div class="sectionHint">開始 → 終了 → % の順で入力（Enterで次行を追加）</div>
+            <div class="sectionHint">開始 → 終了 → %</div>
           </div>
         </div>
         <div class="right">
-          <button class="primary bigBtn" id="addPeriodBtn">＋ 期間をもう1つ追加</button>
+          <button class="primary bigBtn" id="addPeriodBtn">＋ 期間追加</button>
           <button class="ghost danger bigBtn" id="clearPeriodsBtn">期間全消し</button>
         </div>
       </div>
 
       <div style="margin-top:10px; overflow:auto;">
-        <table class="grid">
+        <table class="grid compact">
           <thead>
             <tr>
-              <th style="min-width:170px;">START（Flight開始日）</th>
-              <th style="min-width:170px;">END（Flight終了日）</th>
-              <th style="min-width:140px;">期間配分 %</th>
+              <th style="min-width:170px;">START</th>
+              <th style="min-width:170px;">END</th>
+              <th class="numCol" style="min-width:140px;">%</th>
               <th style="width:1%;">削除</th>
             </tr>
           </thead>
@@ -512,23 +585,37 @@ kagome_Vendor_これいち_Performance+,60"></textarea>
     <div class="card outputCard highlightOutput" id="card4">
       <div class="row" style="justify-content:space-between;align-items:center;">
         <div>
-          <div class="outputTitle">❹ 貼り付け用アウトプット（転記用 / TSV / ¥付き）</div>
-          <div class="micro">
-            スプシにそのまま貼るだけ（列：<b>Order名 / Flight Budget / 開始 / 終了</b>）
-          </div>
-          <div class="mini" style="margin-top:6px;">コツ：生成後はテキスト欄をクリック→必要なら全選択して貼り付けでもOK</div>
+          <div class="outputTitle">❹ 貼り付け用アウトプット</div>
         </div>
 
         <div class="right">
-          <button class="primary bigBtn" id="generateBtn">① 転記用生成</button>
+          <button class="primary bigBtn" id="generateBtn">① 生成</button>
           <button class="primary bigBtn" id="copyBtn">② コピー</button>
           <button class="ghost danger bigBtn" id="clearOutputBtn">消す</button>
         </div>
       </div>
 
-      <div style="margin-top:10px;">
-        <textarea id="output" class="outputArea" placeholder="転記用TSVがここに出ます → そのままスプシへ貼り付け"></textarea>
+      <!-- ✅ スプシ風プレビュー -->
+      <div class="sheetWrap" style="margin-top:10px;">
+        <table class="sheet">
+          <thead>
+            <tr>
+              <th style="min-width:420px;">Order名</th>
+              <th style="min-width:180px; text-align:right;">Flight Budget</th>
+              <th style="min-width:160px;">開始</th>
+              <th style="min-width:160px;">終了</th>
+            </tr>
+          </thead>
+          <tbody id="sheetBody">
+            <tr>
+              <td colspan="4" class="sheetEmpty">まだ未生成</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
+
+      <!-- ✅ コピー用TSV（非表示） -->
+      <textarea id="output" style="display:none;"></textarea>
     </div>
   </div>
 
@@ -560,6 +647,7 @@ kagome_Vendor_これいち_Performance+,60"></textarea>
   const elStatusText = document.getElementById("statusText");
 
   const elOutput = document.getElementById("output");
+  const elSheetBody = document.getElementById("sheetBody");
 
   // stepper + cards
   const chips = [
@@ -640,13 +728,48 @@ kagome_Vendor_これいち_Performance+,60"></textarea>
     return parsed;
   }
 
+  // ===== sheet preview render =====
+  function setSheetRows(rows){
+    elSheetBody.innerHTML = "";
+
+    if (!rows.length){
+      const tr = document.createElement("tr");
+      const td = document.createElement("td");
+      td.colSpan = 4;
+      td.className = "sheetEmpty";
+      td.textContent = "まだ未生成";
+      tr.appendChild(td);
+      elSheetBody.appendChild(tr);
+      return;
+    }
+
+    for (const r of rows){
+      const tr = document.createElement("tr");
+
+      const td1 = document.createElement("td");
+      td1.textContent = r.order;
+
+      const td2 = document.createElement("td");
+      td2.className = "moneyCell";
+      td2.textContent = r.budget;
+
+      const td3 = document.createElement("td");
+      td3.textContent = r.start;
+
+      const td4 = document.createElement("td");
+      td4.textContent = r.end;
+
+      tr.append(td1, td2, td3, td4);
+      elSheetBody.appendChild(tr);
+    }
+  }
+
   // ===== in-place recalculation (no rerender while typing %) =====
   function recalcOrdersInPlace(){
     const total = toNum(elTotalBudget.value);
     elTotalBudgetView.textContent = yen(total);
 
-    // DOM% -> state
-    const pctInputs = qsa("input[type='number']", elOrdersTableBody);
+    const pctInputs = qsa("input.cellInput", elOrdersTableBody);
     pctInputs.forEach((inp, i) => {
       if (ordersState[i]) ordersState[i].pct = toNum(inp.value);
     });
@@ -676,7 +799,6 @@ kagome_Vendor_これいち_Performance+,60"></textarea>
     const pctSum = ordersState.reduce((s,o)=>s+toNum(o.pct),0);
     elOrderPctSum.textContent = `${Math.round(pctSum*100)/100}%`;
 
-    // compute order amounts + rounding adjust into last row
     const computed = ordersState.map(o => ({
       ...o,
       amt: roundYen(total * (toNum(o.pct)/100))
@@ -695,16 +817,28 @@ kagome_Vendor_これいち_Performance+,60"></textarea>
       tdName.style.wordBreak = "break-word";
 
       const tdPct = document.createElement("td");
-      tdPct.className = "editCell";
+      tdPct.className = "editCell pctCell numCol";
+
+      const wrap = document.createElement("div");
+      wrap.className = "pctWrap";
+
       const inPct = document.createElement("input");
       inPct.type = "number";
       inPct.step = "0.01";
       inPct.min = "0";
       inPct.value = String(toNum(o.pct) || "");
       inPct.placeholder = "例）40";
-      tdPct.appendChild(inPct);
+      inPct.className = "cellInput";
+
+      const suf = document.createElement("span");
+      suf.className = "pctSuffix";
+      suf.textContent = "%";
+
+      wrap.append(inPct, suf);
+      tdPct.appendChild(wrap);
 
       const tdAmt = document.createElement("td");
+      tdAmt.className = "numCol";
       const divAmt = document.createElement("div");
       divAmt.className = "money";
       divAmt.textContent = yen(o.amt);
@@ -713,7 +847,6 @@ kagome_Vendor_これいち_Performance+,60"></textarea>
       tr.append(tdName, tdPct, tdAmt);
       elOrdersTableBody.appendChild(tr);
 
-      // ★入力中は再レンダリングしない（フォーカスが飛ばない）
       inPct.addEventListener("input", () => {
         ordersState[idx].pct = toNum(inPct.value);
         recalcOrdersInPlace();
@@ -722,7 +855,7 @@ kagome_Vendor_これいち_Performance+,60"></textarea>
       inPct.addEventListener("keydown", (e) => {
         if (e.key === "Enter"){
           e.preventDefault();
-          const pctInputs = qsa("input[type='number']", elOrdersTableBody);
+          const pctInputs = qsa("input.cellInput", elOrdersTableBody);
           const i = pctInputs.indexOf(inPct);
           const next = pctInputs[i+1];
           if (next) next.focus();
@@ -749,7 +882,7 @@ kagome_Vendor_これいち_Performance+,60"></textarea>
     tdE.appendChild(inE);
 
     const tdPct = document.createElement("td");
-    tdPct.className = "editCell";
+    tdPct.className = "editCell numCol";
     const inPct = document.createElement("input");
     inPct.type = "number";
     inPct.step = "0.01";
@@ -811,16 +944,12 @@ kagome_Vendor_これいち_Performance+,60"></textarea>
 
   // ===== stepper + "next card" visuals =====
   function setStepUI(activeStepIndex, doneUpToIndex){
-    // clear
     chips.forEach(c => c.classList.remove("active", "done"));
     cards.forEach(c => c.classList.remove("isNext"));
 
-    // done state
     for (let i=0; i<=doneUpToIndex; i++){
       if (chips[i]) chips[i].classList.add("done");
     }
-
-    // active + highlight card
     if (chips[activeStepIndex]) chips[activeStepIndex].classList.add("active");
     if (cards[activeStepIndex]) cards[activeStepIndex].classList.add("isNext");
   }
@@ -838,8 +967,6 @@ kagome_Vendor_これいち_Performance+,60"></textarea>
     const hasOrders = ordersState.length > 0 && ordersState.every(o => (o.name || "").trim().length > 0);
     const hasPeriods = periods.length > 0 && periods.every(p => !!p.start && !!p.end);
 
-    // Decide next step (visual guidance only)
-    // 0:budget, 1:orders, 2:periods, 3:output
     let nextStep = 0;
     let doneUpTo = -1;
 
@@ -847,17 +974,15 @@ kagome_Vendor_これいち_Performance+,60"></textarea>
     if (hasTotal && hasOrders) { doneUpTo = 1; nextStep = 2; }
     if (hasTotal && hasOrders && hasPeriods) { doneUpTo = 2; nextStep = 3; }
 
-    // When everything exists, "Output" is active
     setStepUI(nextStep, doneUpTo);
 
     if (!hasTotal || !hasOrders || !hasPeriods){
       elStatusDot.className = "dot bad";
 
-      // More directive, less "status"
       if (!hasTotal){
         elStatusText.textContent = `次は「全体予算（NET）」を入力してね`;
       } else if (!hasOrders){
-        elStatusText.textContent = `次は「Orderの貼り付け」だよ（改行で複数OK）`;
+        elStatusText.textContent = `次は「Orderの貼り付け」だよ`;
       } else if (!hasPeriods){
         elStatusText.textContent = `次は「期間の開始日→終了日」を入れてね`;
       } else {
@@ -875,16 +1000,15 @@ kagome_Vendor_これいち_Performance+,60"></textarea>
 
     if (warns.length){
       elStatusDot.className = "dot";
-      elStatusText.textContent = `OK（注意）: ${warns.join(" / ")} → 生成してOK（端数は最後に寄せる）`;
+      elStatusText.textContent = `OK（注意）: ${warns.join(" / ")}`;
     } else {
       elStatusDot.className = "dot ok";
-      elStatusText.textContent = "OK：あとは「転記用生成」→「コピー」だけ";
+      elStatusText.textContent = "OK";
     }
   }
 
   // ===== output =====
   function generateTSV(){
-    // %入力中はin-place更新なので、最後に1回だけ整合
     recalcOrdersInPlace();
 
     const total = toNum(elTotalBudget.value);
@@ -909,38 +1033,51 @@ kagome_Vendor_これいち_Performance+,60"></textarea>
 
     const header = ["Order名","Flight Budget","Flight開始日","Flight終了日"].join("\t");
     const lines = [header];
+    const rows = [];
 
     for (const o of orderAmts){
       const pRows = calcPeriodAmounts(o.amt);
       for (const p of pRows){
-        lines.push([
+        const row = [
           o.name,
           yen(p.amt),
           fmtYMD(p.start),
           fmtYMD(p.end)
-        ].join("\t"));
+        ];
+        lines.push(row.join("\t"));
+
+        rows.push({
+          order: o.name,
+          budget: yen(p.amt),
+          start: fmtYMD(p.start),
+          end: fmtYMD(p.end)
+        });
       }
     }
 
     elOutput.value = lines.join("\n");
-    updateStatus(); // keep UI guidance fresh
+    setSheetRows(rows);
+    updateStatus();
   }
 
   async function copyOut(){
-    const tsv = elOutput.value.trim();
-    if (!tsv) { alert("先に転記用生成してね"); return; }
+    const tsv = (elOutput.value || "").trim();
+    if (!tsv) { alert("先に生成してね"); return; }
     try{
       await navigator.clipboard.writeText(tsv);
-      alert("コピーした！スプシに貼ってOK");
+      alert("コピーした！");
     }catch(e){
-      elOutput.focus(); elOutput.select();
+      const tmp = document.createElement("textarea");
+      tmp.value = tsv;
+      document.body.appendChild(tmp);
+      tmp.select();
       document.execCommand("copy");
-      alert("コピーした（互換モード）！スプシに貼ってOK");
+      tmp.remove();
+      alert("コピーした！");
     }
   }
 
   // ===== events =====
-  // ❶ 全体予算 Enter → Orderへ
   elTotalBudget.addEventListener("keydown", (e) => {
     if (e.key === "Enter"){
       e.preventDefault();
@@ -948,17 +1085,14 @@ kagome_Vendor_これいち_Performance+,60"></textarea>
     }
   });
   elTotalBudget.addEventListener("input", () => {
-    // total変えたら金額だけ更新（%入力のフォーカス維持）
     recalcOrdersInPlace();
   });
 
-  // ❷ Order：inputで即反映
   elOrdersBulk.addEventListener("input", () => {
     ordersState = parseOrdersBulk(elOrdersBulk.value);
     renderOrdersTable();
   });
 
-  // ★ペースト直後に期間へフォーカス
   elOrdersBulk.addEventListener("paste", () => {
     setTimeout(() => {
       focusFirstPeriodStart();
@@ -988,7 +1122,10 @@ kagome_Vendor_これいち_Performance+,60"></textarea>
 
   document.getElementById("generateBtn").addEventListener("click", generateTSV);
   document.getElementById("copyBtn").addEventListener("click", copyOut);
-  document.getElementById("clearOutputBtn").addEventListener("click", () => elOutput.value = "");
+  document.getElementById("clearOutputBtn").addEventListener("click", () => {
+    elOutput.value = "";
+    setSheetRows([]);
+  });
 
   // ===== init =====
   elPeriodsBody.appendChild(makePeriodRow());
